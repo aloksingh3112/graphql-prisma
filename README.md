@@ -1,1 +1,2 @@
-graphql basics
+graphql-prisma
+
