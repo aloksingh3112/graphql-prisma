@@ -1,0 +1,88 @@
+ type Query{
+       greeting(name:String,title:String):String!
+       user(query:String):[User!]! ,
+       post(query:String):[Post!]!,
+       comments:[Comment!]!
+
+    },
+
+    type Mutation{
+      createUser(data: createUserInput):User!,
+      deleteUser(id:ID!):User!,
+      updateUser(id:ID!,data:updateUserInput):User!
+      createPost(data:createPostInput):Post!,
+      deletePost(id:ID!):Post!,
+      updatePost(id:ID!,data:updatePostInput):Post!,
+      createComment(data:createCommentInput):Comment!
+    },
+    input createUserInput{
+       name:String!,
+       email:String!,
+       age:Int
+    },
+    input updateUserInput{
+        name:String,
+        email:String,
+        age:Int
+    }
+
+
+    input createPostInput{
+        title:String!,
+        body:String!,
+        isPublished:Boolean!,
+        author:ID!
+
+    },
+    input updatePostInput{
+        title:String,
+        body:String,
+        isPublished:Boolean,
+
+    }
+    input createCommentInput{
+       text:String!,
+       author:ID!,
+       post:ID!
+    }
+    
+
+
+    type User{
+       id:ID!,
+       name:String!,
+       email:String!,
+       age:Int,
+       post:[Post!]!,
+       comments:[Comment!]!
+   },
+
+   type Post{
+    id:ID!,
+    title:String!,
+    body:String!,
+    isPublished:Boolean!,
+    author:User!,
+    comments:[Comment!]!
+
+   },
+   type Comment{
+       id:ID!,
+       text:String!,
+       author:User!,
+       post:Post!
+   },
+   type Subscription{
+       count:Int!,
+       comment(postId:ID!):CommentSubscriberPayload!,
+       post:PostSubscriberPayload!,
+       
+   }
+   type PostSubscriberPayload{
+       mutation:String!,
+       data:Post!
+   }
+   type CommentSubscriberPayload{
+       mutation:String!,
+       data:Comment!
+   }
