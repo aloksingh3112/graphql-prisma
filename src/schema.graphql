@@ -30,14 +30,14 @@
     input createPostInput{
         title:String!,
         body:String!,
-        isPublished:Boolean!,
+        isPublish:Boolean!,
         author:ID!
 
     },
     input updatePostInput{
         title:String,
         body:String,
-        isPublished:Boolean,
+        isPublish:Boolean,
 
     }
     input createCommentInput{
@@ -61,7 +61,7 @@
     id:ID!,
     title:String!,
     body:String!,
-    isPublished:Boolean!,
+    isPublish:Boolean!,
     author:User!,
     comments:[Comment!]!
 

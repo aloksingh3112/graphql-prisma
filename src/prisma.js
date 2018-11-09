@@ -5,6 +5,8 @@ const prisma=new Prisma({
     endpoint:"http://192.168.99.100:4466",
 });
 
+export {prisma as default};
+
 // prisma.query.users(null,'{id name email}')
 //   .then((data)=>{
 //       console.log(data);
@@ -38,37 +40,37 @@ const prisma=new Prisma({
 //  },'{id title body isPublish}')
 //  .then(data=>console.log(data));
 
-const updatePostForUser=async (postId,data)=>{
-    try{   
-      const userExist=await prisma.exists.Post({
-          id:postId
-      })  
-      if(!userExist){
-          throw new Error("new post available");
-      }  
-    const updatedPost=await prisma.mutation.updatePost({
-        data:{
-            ...data
-        },
-        where:{
-            id:postId
-        }
-    }
-        ,'{ user {id} }');
+// const updatePostForUser=async (postId,data)=>{
+//     try{   
+//       const userExist=await prisma.exists.Post({
+//           id:postId
+//       })  
+//       if(!userExist){
+//           throw new Error("new post available");
+//       }  
+//     const updatedPost=await prisma.mutation.updatePost({
+//         data:{
+//             ...data
+//         },
+//         where:{
+//             id:postId
+//         }
+//     }
+//         ,'{ user {id} }');
 
-   const user=await prisma.query.user({
-       where:{
-           id:updatedPost.user.id
-       }
-   },'{id name email}')
-   return user
-}catch(err){
-    console.log("hggg",err);
-}
-}
-updatePostForUser('cjo8sfczc0008086875r8r1e3',{
-    title:"hello worls i m here"
-}).then(data=>console.log(data));
+//    const user=await prisma.query.user({
+//        where:{
+//            id:updatedPost.user.id
+//        }
+//    },'{id name email}')
+//    return user
+// }catch(err){
+//     console.log("hggg",err);
+// }
+// }
+// updatePostForUser('cjo8sfczc0008086875r8r1e3',{
+//     title:"hello worls i m here"
+// }).then(data=>console.log(data));
 
 
 
