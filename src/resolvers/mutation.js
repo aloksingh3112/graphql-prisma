@@ -1,43 +1,59 @@
 import uuidv4 from 'uuid/v4';
 const Mutation={
-    createUser(parent,args,{db},info){
-        
-       const useremail=db.users.some(user=>user.email==args.data.email);
-       console.log(useremail);
-       if(useremail){
-            throw new Error("email already existed")
-       }
-       
-       const user={
-           id:uuidv4(),
-          ...args.data
-       }
-      
-       db.users.push(user);
-       return user;
+    async createUser(parent,args,{prisma},info){
+        try{
+        const useremail= await prisma.exists.User({email:args.data.email});
+        if(useremail){
+           throw new Error("email exists")
+        }
+
+        return prisma.mutation.createUser({data:args.data},info)
+
+
+        }
+        catch(err){
+            console.log("error is",err)
+        }
+ 
     },
 
-    deleteUser(parent,args,{db},info){
-      const userIndex=db.users.findIndex(user=>user.id===args.id);
-      if(userIndex==-1){
-          throw new Error("no user found");
-      }
-      const deletedUser=db.users.splice(userIndex,1);
+    async deleteUser(parent,args,{prisma},info){
 
-       db.posts=db.posts.filter((post)=>{
-           const match = post.author==args.id;
-           if(match){
-                db.comments=db.comments.filter(comment=>{
-                     return comment.post!=post.id
-                }) 
-           }
-           return !match
-       })
+        try{
+        const userExist=await prisma.exists.User({id:args.id});
+        if(!userExist){
+            throw new Error("no user exist");
+        }
 
-       db.comments=db.comments.filter((comment)=>comment.author!=args.id);
+        const deletedUser=await prisma.mutation.deleteUser({where:{
+            id:args.id
+        }},info);
+        return deletedUser;
+    }catch(err){
+       console.log(err);
+    }
+
+
+    //   const userIndex=db.users.findIndex(user=>user.id===args.id);
+    //   if(userIndex==-1){
+    //       throw new Error("no user found");
+    //   }
+    //   const deletedUser=db.users.splice(userIndex,1);
+
+    //    db.posts=db.posts.filter((post)=>{
+    //        const match = post.author==args.id;
+    //        if(match){
+    //             db.comments=db.comments.filter(comment=>{
+    //                  return comment.post!=post.id
+    //             }) 
+    //        }
+    //        return !match
+    //    })
+
+    //    db.comments=db.comments.filter((comment)=>comment.author!=args.id);
      
 
-       return deletedUser[0];
+    //    return deletedUser[0];
     },
     
      updateUser(parent,args,{db},info){
