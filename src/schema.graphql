@@ -73,16 +73,16 @@
        post:Post!
    },
    type Subscription{
-       count:Int!,
+      
        comment(postId:ID!):CommentSubscriberPayload!,
        post:PostSubscriberPayload!,
        
    }
    type PostSubscriberPayload{
        mutation:String!,
-       data:Post!
+       node:Post!
    }
    type CommentSubscriberPayload{
        mutation:String!,
-       data:Comment!
+       node:Comment!
    }
