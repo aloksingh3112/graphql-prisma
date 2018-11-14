@@ -56,123 +56,185 @@ const Mutation={
     //    return deletedUser[0];
     },
     
-     updateUser(parent,args,{db},info){
-         const user=db.users.find((user)=>user.id==args.id);
-         if(!user){
-             throw new Error("no user exist");
-         }
+     async updateUser(parent,args,{prisma},info){
+       try{
+          const updatedUser=await prisma.mutation.updateUser({
+              where:{
+                  id:args.id
+              },
+              data:args.data
+          },info);
+          return updatedUser;
 
-         if(typeof args.data.email ==="string" ){
-             const emailTaken=db.users.some(user=>user.email==args.data.email);
-             if(emailTaken){
-                 throw new Error("email already taken")
-             }
-             user.email=args.data.email
+        }
+        catch(err){
+            console.log(err);
+        }
+
+
+
+
+        //  const user=db.users.find((user)=>user.id==args.id);
+        //  if(!user){
+        //      throw new Error("no user exist");
+        //  }
+
+        //  if(typeof args.data.email ==="string" ){
+        //      const emailTaken=db.users.some(user=>user.email==args.data.email);
+        //      if(emailTaken){
+        //          throw new Error("email already taken")
+        //      }
+        //      user.email=args.data.email
              
-         }
-         if(typeof args.data.name==="string"){
-             const nametaken=db.users.some(user=>user.name===args.data.name);
-             if(nametaken){
-                 throw new Error("name already exist");
-             }
-             user.name=args.data.name
-         }
-         if(typeof args.data.age!=undefined){
-             user.age=args.data.age
-         }
+        //  }
+        //  if(typeof args.data.name==="string"){
+        //      const nametaken=db.users.some(user=>user.name===args.data.name);
+        //      if(nametaken){
+        //          throw new Error("name already exist");
+        //      }
+        //      user.name=args.data.name
+        //  }
+        //  if(typeof args.data.age!=undefined){
+        //      user.age=args.data.age
+        //  }
 
-         return user;
+        //  return user;
 
 
 
      },
   
     
-    createPost(parent,args,{db,pubsub},info){
-        console.log(args.author);
-        const userExis=db.users.some((user)=>user.id=args.data.author);
-         if(!userExis){
-             throw new Error('user not existed')
-         }
-         const post={
-             id:uuidv4(),
-             ...args.data
-        }
-        
-        db.posts.push(post);
-        if(post.isPublished){
-            pubsub.publish('post1',{
-                post:{
-                    mutation:"CREATED",
-                    data:post
+    async createPost(parent,args,{prisma,pubsub},info){
+     try{
+      const post=await prisma.mutation.createPost({
+          data:{
+            title:args.data.title,
+            isPublish:args.data.isPublish,
+            body:args.data.body,
+            user:{
+                connect:{
+                    id:args.data.user
                 }
-            })
-        }
-        return post;
-    },
-
-    deletePost(parent,args,{db,pubsub},info){
-     const findIndex=db.posts.findIndex(post=>post.id==args.id);
-     if(findIndex==-1){
-         throw new Error("no post exist")
-        }
-     const deletedPost=db.posts.splice(findIndex,1);
-
-     db.comments=db.comments.filter(comment=>comment.post!==args.id);
-
-     if(deletedPost[0].isPublished){
-        pubsub.publish('post1',{
-            post:{
-                mutation:"DETETED",
-                data:deletedPost[0]
             }
-        })
-     }
-     return deletedPost[0];
+          }
+      },info);
+      return post;
+    }
+    catch(err){
+        console.log("error is ",err);
+    }
+
+
+        
+        // const userExis=db.users.some((user)=>user.id=args.data.author);
+        //  if(!userExis){
+        //      throw new Error('user not existed')
+        //  }
+        //  const post={
+        //      id:uuidv4(),
+        //      ...args.data
+        // }
+        
+        // db.posts.push(post);
+        // if(post.isPublished){
+        //     pubsub.publish('post1',{
+        //         post:{
+        //             mutation:"CREATED",
+        //             data:post
+        //         }
+        //     })
+        // }
+        // return post;
+    },
+
+    async deletePost(parent,args,{prisma,pubsub},info){
+        try{
+        const deletedPost=await prisma.mutation.deletePost({
+            where:{
+                id:args.id
+            }
+        },info);
+        return deletedPost;
+    }
+    catch(err){
+        console.log(err);
+    }
+    //  const findIndex=db.posts.findIndex(post=>post.id==args.id);
+    //  if(findIndex==-1){
+    //      throw new Error("no post exist")
+    //     }
+    //  const deletedPost=db.posts.splice(findIndex,1);
+
+    //  db.comments=db.comments.filter(comment=>comment.post!==args.id);
+
+    //  if(deletedPost[0].isPublished){
+    //     pubsub.publish('post1',{
+    //         post:{
+    //             mutation:"DETETED",
+    //             data:deletedPost[0]
+    //         }
+    //     })
+    //  }
+    //  return deletedPost[0];
 
 
 
     },
-    updatePost(parent,args,{db,pubsub},info){
-       const post=db.posts.find((post)=>post.id==args.id);
-       const originalPost={...post};
-       if(!post){
-           throw new Error("no post is there");
-       }
-       if(typeof args.data.title !=undefined){
-           post.title=args.data.title
-       }
-       if(typeof args.data.body !=undefined){
-        post.body=args.data.body
-      }
-      if(typeof args.data.isPublished !=undefined){
-        post.isPublished=args.data.isPublished
-        if(originalPost.isPublished && !post.isPublished){
-            pubsub.publish('post1',{
-                post:{
-                    mutation:"DELETED",
-                    data:originalPost
-                }
-            })
-        }
-        else if(!originalPost.isPublished && post.isPublished){
-           pubsub.publish('post1',{
-               post:{
-                   mutation:"CREATED",
-                   data:post
-               }
-           })    
-        }
-        else if(post.isPublished){
-            pubsub.publish('post1',{
-                post:{
-                    mutation:"UPDATED",
-                    data:post
-                }
-            })
-        }
+    async updatePost(parent,args,{prisma,pubsub},info){
+   try{
+      const updatedPost=await prisma.mutation.updatePost({
+          data:{
+              ...args.data
+          },
+          where:{
+              id:args.id
+          }
+      },info);
+      return updatedPost;
     }
-       return post;
+    catch(err){
+        console.log(err);
+    }
+    //    const post=db.posts.find((post)=>post.id==args.id);
+    //    const originalPost={...post};
+    //    if(!post){
+    //        throw new Error("no post is there");
+    //    }
+    //    if(typeof args.data.title !=undefined){
+    //        post.title=args.data.title
+    //    }
+    //    if(typeof args.data.body !=undefined){
+    //     post.body=args.data.body
+    //   }
+    //   if(typeof args.data.isPublished !=undefined){
+    //     post.isPublished=args.data.isPublished
+    //     if(originalPost.isPublished && !post.isPublished){
+    //         pubsub.publish('post1',{
+    //             post:{
+    //                 mutation:"DELETED",
+    //                 data:originalPost
+    //             }
+    //         })
+    //     }
+    //     else if(!originalPost.isPublished && post.isPublished){
+    //        pubsub.publish('post1',{
+    //            post:{
+    //                mutation:"CREATED",
+    //                data:post
+    //            }
+    //        })    
+    //     }
+    //     else if(post.isPublished){
+    //         pubsub.publish('post1',{
+    //             post:{
+    //                 mutation:"UPDATED",
+    //                 data:post
+    //             }
+    //         })
+    //     }
+    // }
+    //    return post;
 
     },
 

@@ -31,7 +31,7 @@
         title:String!,
         body:String!,
         isPublish:Boolean!,
-        author:ID!
+        user:ID!
 
     },
     input updatePostInput{
@@ -62,7 +62,7 @@
     title:String!,
     body:String!,
     isPublish:Boolean!,
-    author:User!,
+    user:User!,
     comments:[Comment!]!
 
    },
