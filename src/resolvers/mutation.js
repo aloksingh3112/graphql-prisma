@@ -238,27 +238,52 @@ const Mutation={
 
     },
 
-    createComment(parent,args,{db,pubsub},info){
-        const isUser=db.users.some((user)=>user.id==args.data.author);
-        if(!isUser){
-            throw new Error('user not existed')
-        }
-        const isPost=db.posts.some((post)=>post.id==args.data.post);
-        if(!isPost){
-            throw new Error("post does ot existed")
-        }
-        const comment={
-            id:uuidv4(),
-            ...args.data
-        }
-        db.comments.push(comment);
-         pubsub.publish(`comment ${args.data.post}`,{
-             comment:{
-                 mutation:"CREATED",
-                 data:comment
+    async createComment(parent,args,{prisma,pubsub},info){
+        try{
+     const comment=await prisma.mutation.createComment({
+         data:{
+             text:args.data.text,
+             author:{
+                 connect:{
+                     id:args.data.author
+                 }
+             },
+             post:{
+                 connect:{
+                     id:args.data.post
+                 }
              }
-         })
-        return comment;
+
+         }
+     },info);
+     return comment;
+    }catch(err){
+        console.log(err);
+    }
+     
+
+
+
+        // const isUser=db.users.some((user)=>user.id==args.data.author);
+        // if(!isUser){
+        //     throw new Error('user not existed')
+        // }
+        // const isPost=db.posts.some((post)=>post.id==args.data.post);
+        // if(!isPost){
+        //     throw new Error("post does ot existed")
+        // }
+        // const comment={
+        //     id:uuidv4(),
+        //     ...args.data
+        // }
+        // db.comments.push(comment);
+        //  pubsub.publish(`comment ${args.data.post}`,{
+        //      comment:{
+        //          mutation:"CREATED",
+        //          data:comment
+        //      }
+        //  })
+        // return comment;
 
     }
 
