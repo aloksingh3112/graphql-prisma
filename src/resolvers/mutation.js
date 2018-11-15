@@ -1,4 +1,5 @@
-import uuidv4 from 'uuid/v4';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 const Mutation={
     async createUser(parent,args,{prisma},info){
         try{
@@ -6,8 +7,15 @@ const Mutation={
         if(useremail){
            throw new Error("email exists")
         }
+        if(args.data.password.length<8){
+            throw new Error("password must be of greater than length 8");
+        }
 
-        return prisma.mutation.createUser({data:args.data},info)
+        const password= await bcrypt.hash(args.data.password,10);
+        return prisma.mutation.createUser({data:{
+            ...args.data,
+             password
+        }},info)
 
 
         }
