@@ -52,6 +52,7 @@
        id:ID!,
        name:String!,
        email:String!,
+       password:String!
        age:Int,
        post:[Post!]!,
        comments:[Comment!]!
