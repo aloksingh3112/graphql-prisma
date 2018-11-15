@@ -40,7 +40,7 @@
         title:String!,
         body:String!,
         isPublish:Boolean!,
-        user:ID!
+        
 
     },
     input updatePostInput{
