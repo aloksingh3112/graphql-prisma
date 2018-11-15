@@ -7,7 +7,8 @@
     },
 
     type Mutation{
-      createUser(data: createUserInput):User!,
+      createUser(data: createUserInput):AuthPayload!,
+      login(data:loginInput):AuthPayload!,
       deleteUser(id:ID!):User!,
       updateUser(id:ID!,data:updateUserInput):User!
       createPost(data:createPostInput):Post!,
@@ -15,6 +16,14 @@
       updatePost(id:ID!,data:updatePostInput):Post!,
       createComment(data:createCommentInput):Comment!
     },
+    type AuthPayload{
+        user:User!,
+        token:String!
+    }
+    input loginInput{
+        email:String!,
+        password:String!
+    }
     input createUserInput{
        name:String!,
        email:String!,
