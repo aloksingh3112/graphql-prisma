@@ -65,16 +65,13 @@ const Mutation={
  
     },
 
-    async deleteUser(parent,args,{prisma},info){
+    async deleteUser(parent,args,{prisma,request},info){
 
         try{
-        const userExist=await prisma.exists.User({id:args.id});
-        if(!userExist){
-            throw new Error("no user exist");
-        }
+        const userId=getUserId(request) ;   
 
-        const deletedUser=await prisma.mutation.deleteUser({where:{
-            id:args.id
+       const deletedUser=await prisma.mutation.deleteUser({where:{
+            id:userId
         }},info);
         return deletedUser;
     }catch(err){
@@ -104,11 +101,12 @@ const Mutation={
     //    return deletedUser[0];
     },
     
-     async updateUser(parent,args,{prisma},info){
+     async updateUser(parent,args,{prisma,request},info){
        try{
+           const userId=getUserId(request)
           const updatedUser=await prisma.mutation.updateUser({
               where:{
-                  id:args.id
+                  id:userId
               },
               data:args.data
           },info);
@@ -201,7 +199,23 @@ const Mutation={
     },
 
     async deletePost(parent,args,{prisma,pubsub},info){
+
+        const userId=getUserId(request);
         try{
+        
+            const isPost=await prisma.exists.Post({
+                where:{
+                    id:args.id,
+                    user:{
+                        id:userId
+                    }
+                }
+            })
+            
+       if(!userId){
+           throw new Error("no post exists");
+       }
+
         const deletedPost=await prisma.mutation.deletePost({
             where:{
                 id:args.id
@@ -233,8 +247,20 @@ const Mutation={
 
 
     },
-    async updatePost(parent,args,{prisma,pubsub},info){
+    async updatePost(parent,args,{prisma,request},info){
+        const userId=getUserId(request);
    try{
+       const isPost=await prisma.exists.Post({
+           where:{
+               id:args.id,
+               user:{
+                   id:userId
+               }
+           }
+       });
+       if(!isPost){
+           throw new Error("no post exists");
+       }
       const updatedPost=await prisma.mutation.updatePost({
           data:{
               ...args.data
@@ -290,14 +316,17 @@ const Mutation={
 
     },
 
-    async createComment(parent,args,{prisma,pubsub},info){
+    async createComment(parent,args,{prisma,request},info){
+        const userId=getUserId(request);
+        
         try{
-     const comment=await prisma.mutation.createComment({
+        
+      const comment=await prisma.mutation.createComment({
          data:{
              text:args.data.text,
              author:{
                  connect:{
-                     id:args.data.author
+                     id:userId
                  }
              },
              post:{

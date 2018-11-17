@@ -9,8 +9,8 @@
     type Mutation{
       createUser(data: createUserInput):AuthPayload!,
       login(data:loginInput):AuthPayload!,
-      deleteUser(id:ID!):User!,
-      updateUser(id:ID!,data:updateUserInput):User!
+      deleteUser:User!,
+      updateUser(data:updateUserInput):User!
       createPost(data:createPostInput):Post!,
       deletePost(id:ID!):Post!,
       updatePost(id:ID!,data:updatePostInput):Post!,
@@ -51,7 +51,7 @@
     }
     input createCommentInput{
        text:String!,
-       author:ID!,
+       
        post:ID!
     }
     
